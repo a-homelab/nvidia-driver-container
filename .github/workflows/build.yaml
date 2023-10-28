@@ -48,5 +48,6 @@ jobs:
             DRIVER_VERSION=${{ matrix.driver }}
             CUDA_VERSION=12.2.2
             TARGETARCH=amd64
+            DRIVER_BRANCH=535
           tags: bennycooly/nvidia-driver:${{ matrix.driver }}-${{ matrix.os }}
     
