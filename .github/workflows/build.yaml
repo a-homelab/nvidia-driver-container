@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/driver/tags
+        driver:
+          - "535.104.12"
+        os:
+          - ubuntu22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout nvidia drivers repo
+        uses: actions/checkout@v4
+        with:
+          repository: NVIDIA/GPU-Driver-Container
+          path: nvidia-driver-container
+
+      - name: Patch nvidia-driver installer
+        run: |
+          patch -p1 nvidia-driver-container/${{ matrix.os }}/nvidia-driver nvidia-driver.patch
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nvidia-driver-container/${{ matrix.os }}
+          push: true
+          build-args: |-
+            DRIVER_VERSION=${{ matrix.driver }}
+            CUDA_VERSION=12.2.2
+            TARGETARCH=amd64
+          tags: bennycooly/nvidia-driver:${{ matrix.driver }}-${{ matrix.os }}
+    
