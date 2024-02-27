@@ -13,7 +13,7 @@ jobs:
       matrix:
         # https://catalog.ngc.nvidia.com/orgs/nvidia/containers/driver/tags
         driver:
-          - "535.104.12"
+          - "535.154.05"
         os:
           - ubuntu22.04
     steps:
@@ -46,8 +46,7 @@ jobs:
           push: true
           build-args: |-
             DRIVER_VERSION=${{ matrix.driver }}
-            CUDA_VERSION=12.2.2
+            CUDA_VERSION=12.3.1
             TARGETARCH=amd64
             DRIVER_BRANCH=535
           tags: bennycooly/nvidia-driver:${{ matrix.driver }}-${{ matrix.os }}
-    
